@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:17
+    container_name: landmarks-psql-db
+    environment:
+      POSTGRES_PASSWORD: 1234 # пароль для пользователя postgres
+      POSTGRES_DB: landmarks # имя базы данных
+      POSTGRES_USER: postgres # имя пользователя
+    ports:
+      - "127.0.0.1:5433:5432" # перенаправление порта с хоста на контейнер
+    volumes:
+      - db-data:/var/lib/postgresql/data # монтирование данных для сохранения состояния
+
+  app:
+    build: .
+    container_name: landmarks-app
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/landmarks
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1234
+    ports:
+      - "8080:8080" # перенаправление порта для приложения
+    networks:
+      - app-network
+
+volumes:
+  db-data:
+
+networks:
+  app-network:
+    driver: bridge
